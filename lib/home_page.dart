@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'quiz_page.dart';
+import 'dart:math';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -36,6 +37,25 @@ class _HomePageState extends State<HomePage> {
           amount: amount,
           category: _selectedCategory,
           difficulty: _selectedDifficulty,
+        ),
+      ),
+    );
+  }
+
+  void _startRandomQuiz() {
+    final random = Random();
+    final categoriesList = _categories.values.toList();
+    final difficultiesList = _difficulties;
+    final int randomCategory = categoriesList[random.nextInt(categoriesList.length)];
+    final String randomDifficulty = difficultiesList[random.nextInt(difficultiesList.length)];
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => QuizScreen(
+          amount: 10,
+          category: randomCategory,
+          difficulty: randomDifficulty,
         ),
       ),
     );
@@ -92,10 +112,15 @@ class _HomePageState extends State<HomePage> {
                 });
               },
             ),
-            const Spacer(),
+            const SizedBox(height: 5),
             ElevatedButton(
               onPressed: _startQuiz,
               child: const Text('Start Quiz'),
+            ),
+            const SizedBox(height: 5),
+            ElevatedButton(
+              onPressed: _startRandomQuiz,
+              child: const Text('Random Quiz'),
             ),
           ],
         ),

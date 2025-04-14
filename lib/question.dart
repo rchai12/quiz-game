@@ -1,3 +1,5 @@
+import 'package:html/parser.dart' as htmlParser;
+
 class Question {
   final String question;
   final List<String> options;
@@ -11,14 +13,18 @@ class Question {
 
   factory Question.fromJson(Map<String, dynamic> json) {
     // Decode options by combining incorrect answers with the correct answer and shuffling them.
-    List<String> options = List<String>.from(json['incorrect_answers']);
-    options.add(json['correct_answer']);
+    String decodedQuestion = htmlParser.parse(json['question']).documentElement?.text ?? '';
+    String decodedCorrectAnswer = htmlParser.parse(json['correct_answer']).documentElement?.text ?? '';
+    List<String> options = List<String>.from(json['incorrect_answers']).map((option) {
+      return htmlParser.parse(option).documentElement?.text ?? '';
+    }).toList();
+    options.add(decodedCorrectAnswer);
     options.shuffle();
 
     return Question(
-      question: json['question'],
+      question: decodedQuestion,
       options: options,
-      correctAnswer: json['correct_answer'],
+      correctAnswer: decodedCorrectAnswer,
     );
   }
 }
