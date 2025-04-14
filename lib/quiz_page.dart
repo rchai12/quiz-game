@@ -1,8 +1,20 @@
 import 'package:flutter/material.dart';
 import 'question.dart';
 import 'api_service.dart';
+import 'home_page.dart';
 
 class QuizScreen extends StatefulWidget {
+  final int amount;
+  final int? category;
+  final String? difficulty;
+
+  QuizScreen({
+    Key? key,
+    required this.amount,
+    this.category,
+    this.difficulty,
+  }) : super(key: key);
+
   @override
   _QuizScreenState createState() => _QuizScreenState();
 }
@@ -24,7 +36,7 @@ class _QuizScreenState extends State<QuizScreen> {
 
   Future<void> _loadQuestions() async {
     try {
-      final questions = await ApiService.fetchQuestions();
+      final questions = await ApiService.fetchQuestions(amount: widget.amount, category: widget.category, difficulty: widget.difficulty);
       setState(() {
         _questions = questions;
         _loading = false;
@@ -63,7 +75,7 @@ class _QuizScreenState extends State<QuizScreen> {
     return ElevatedButton(
       onPressed: _answered ? null : () => _submitAnswer(option),
       child: Text(option),
-      style: ElevatedButton.styleFrom(primary: Colors.blue),
+      style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
     );
   }
 
@@ -77,9 +89,28 @@ class _QuizScreenState extends State<QuizScreen> {
 
     if (_currentQuestionIndex >= _questions.length) {
       return Scaffold(
+        appBar: AppBar(title: const Text('Quiz Finished')),
         body: Center(
-          child:
-              Text('Quiz Finished! Your Score: $_score/${_questions.length}'),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Quiz Finished! Your Score: $_score/${_questions.length}',
+                style: const TextStyle(fontSize: 18),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const HomePage()),
+                  );
+                },
+                child: const Text('Back to Home Page'),
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -87,7 +118,18 @@ class _QuizScreenState extends State<QuizScreen> {
     final question = _questions[_currentQuestionIndex];
 
     return Scaffold(
-      appBar: AppBar(title: Text('Quiz App')),
+      appBar: AppBar(
+        title: const Text('Quiz App'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HomePage()),
+            );
+          },
+        ),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
